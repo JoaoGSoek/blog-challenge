@@ -1,65 +1,100 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
+import { useActionState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import type z from "zod"
+import FormField from "@/components/composed/formField"
+import PasswordField from "@/components/composed/passwordField"
+import { Button } from "@/components/ui/button"
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/ui/spinner"
+import { LoginFormSchema } from "@/lib/definitions"
+import { authenticate } from "./api/lib/actions"
+
+const Login = () => {
+
+	const form = useForm<z.infer<typeof LoginFormSchema>>({
+		resolver: zodResolver(LoginFormSchema),
+		defaultValues: {
+			email: "",
+			password: "",
+		},
+	});
+
+	const [state, dispatch, isPending] = useActionState(authenticate, undefined);
+
+	useEffect(() => {
+		if (state?.status === 'error')
+			toast.error(state?.message);
+	}, [state]);
+
+	return (
+		<Card className="w-full max-w-sm m-auto">
+			<CardHeader>
+				<CardTitle>Login to your account</CardTitle>
+				<CardDescription>
+					Enter your email below to login to your account
+				</CardDescription>
+				<CardAction>
+					<Button variant="link" asChild>
+						<Link href="/register">
+							Sign Up
+						</Link>
+					</Button>
+				</CardAction>
+			</CardHeader>
+			<form action={dispatch} className="flex flex-col gap-[inherit]">
+				<CardContent>
+					<div className="flex flex-col gap-6">
+						<FormField
+							name="email"
+							label="Email"
+							control={form.control}
+						>
+							<Input
+								id="email"
+								type="email"
+								placeholder="m@example.com"
+								required
+							/>
+						</FormField>
+						<FormField
+							name="password"
+							label="Password"
+							control={form.control}
+						>
+							<PasswordField />
+						</FormField>
+					</div>
+				</CardContent>
+				<CardFooter className="flex-col gap-2">
+					<Button type="submit" className="w-full" disabled={isPending}>
+						{isPending ? (
+							<div className="flex flex-row items-center gap-x-1">
+								<Spinner />
+								<p>Logging in...</p>
+							</div>
+						) : 'Login'}
+					</Button>
+					<Button variant="outline" className="w-full">
+						Login with Google
+					</Button>
+				</CardFooter>
+			</form>
+		</Card>
+	)
 }
+
+export default Login;
