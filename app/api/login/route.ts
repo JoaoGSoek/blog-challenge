@@ -10,6 +10,12 @@ export async function POST(request: Request) {
 			where: { email },
 		});
 
+		if (!user)
+			return NextResponse.json(
+				{ error: "Incorrect credentials" },
+				{ status: 401 },
+			);
+
 		// Compara a senha enviada com o hash do banco
 		const isPasswordValid = await bcrypt.compare(password, user.password);
 
