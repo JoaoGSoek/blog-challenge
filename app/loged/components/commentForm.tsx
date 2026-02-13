@@ -16,13 +16,13 @@ export type CommentFormSchemaType = {
 	comment: string
 }
 
-const CommentTextarea = (props: React.ComponentProps<'textarea'>) => {
+const CommentTextarea = ({ style, ...props }: React.ComponentProps<'textarea'>) => {
 	return (
 		<div className="grid grid-cols-1 grid-rows-1">
 			<Textarea
 				placeholder="Share what you think"
 				className="row-1 col-1 resize-none pr-14"
-				{...props}
+				{...(props as any)}
 			/>
 			<Button type="submit" className="row-1 col-1 self-center justify-self-end w-10 mr-2"><Send /></Button>
 		</div>

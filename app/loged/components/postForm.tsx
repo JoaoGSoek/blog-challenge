@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { PostType } from "./post";
+import type { PostType } from "./post";
 
 const schema = z.object({
 	title: z.string().min(1).max(300),

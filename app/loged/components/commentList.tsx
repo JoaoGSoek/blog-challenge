@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import Comment, { type CommentType } from './comment';
-import CommentForm, { CommentFormSchemaType } from './commentForm';
+import CommentForm, { type CommentFormSchemaType } from './commentForm';
 
 const CommentList = (
 	{
