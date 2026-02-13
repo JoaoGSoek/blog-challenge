@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Post, { type PostType } from '../../components/post';
 
 const renderPostColumns = (data: PostType[]) => {
@@ -45,7 +46,7 @@ export default function Page() {
 	const session = useSession();
 	const username = useMemo(() => params.get('username') || session.data?.user.username, [params, session]);
 
-	const [data, setData] = useState([]);
+	const [data, setData] = useState<PostType[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -57,6 +58,8 @@ export default function Page() {
 			});
 		}
 	}, [username]);
+
+	const isMobile = useIsMobile();
 
 	return (
 		<>
@@ -82,6 +85,10 @@ export default function Page() {
 						<p>Head <Link href="/loged/feed" className="underline underline-offset-4">back to the feed</Link> and start posting!</p>
 					</CardContent>
 				</Card>
+			) : isMobile ? (
+				<div className="flex flex-col gap-3 px-3 max-w-full h-full overflow-auto">
+					{data.map((post) => <Post key={post.id} {...post} />)}
+				</div>
 			) : renderPostColumns(data)}
 		</>
 	)

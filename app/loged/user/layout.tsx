@@ -8,7 +8,7 @@ const Profile = async (
 	}
 ) => {
 	return (
-		<section className="grid grid-rows-[max-content_1px_1fr] gap-y-12 justify-items-center py-12 overflow-hidden">
+		<section className="grid grid-rows-[max-content_1px_1fr] gap-y-12 justify-items-center py-12 overflow-hidden max-w-full">
 			<ProfileHeader />
 			{children}
 		</section>

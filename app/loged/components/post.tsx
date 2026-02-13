@@ -140,7 +140,7 @@ const Post = (
 					postGalery={postMedia}
 				/>
 			)}
-			<Card className="gap-y-5 py-5" key={id}>
+			<Card className="gap-y-5 py-5 max-w-full" key={id}>
 				{(reducedPostMedia?.length > 0) && (
 					<CardContent className={cn(
 						"grid grid-cols-1 grid-rows-1 gap-2 max-w-full aspect-square",

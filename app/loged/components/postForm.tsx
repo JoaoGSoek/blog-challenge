@@ -172,7 +172,7 @@ const PostForm = (
 	}, [form, formDefaults, editId, editMedia, editCallback, postCallback]);
 
 	return (
-		<form className="sticky top-0" onSubmit={form.handleSubmit(submitHandler)}>
+		<form className="sticky top-0 max-h-full overflow-auto max-xl:relative max-xl:w-8/10 max-md:w-full" onSubmit={form.handleSubmit(submitHandler)}>
 			<Card className="gap-y-3 py-5">
 				<CardHeader className="gap-y-1">
 					<CardTitle className="text-lg">

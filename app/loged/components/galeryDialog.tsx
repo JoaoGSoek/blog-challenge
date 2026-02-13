@@ -37,7 +37,7 @@ const MediaGalery = (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent
 				aria-describedby={undefined}
-				className="aspect-square !w-[initial] !max-h-9/10 !max-w-9/10 overflow-hidden grid grid-rows-[max-content_1fr]"
+				className="aspect-square xl:!w-[initial] !max-h-9/10 xl:!max-w-9/10 overflow-hidden grid grid-rows-[max-content_1fr]"
 			>
 				<DialogHeader>
 					<DialogTitle>Galeria de {title}</DialogTitle>
@@ -46,8 +46,8 @@ const MediaGalery = (
 					setApi={setApi}
 					className="flex flex-row items-center w-full h-full overflow-hidden gap-2"
 				>
-					<CarouselPrevious className="relative translate-[initial] top-[initial] left-[initial]" />
-					<CarouselContent className="w-full h-full ml-0">
+					<CarouselPrevious className="relative translate-[initial] top-[initial] left-[initial] max-xl:hidden" />
+					<CarouselContent className="w-full h-full ml-0 items-center">
 						{isOpen && mediaGalery.map((media) => (
 							<CarouselItem key={media.id} className="w-full h-full pl-0">
 								<Image
@@ -60,7 +60,7 @@ const MediaGalery = (
 							</CarouselItem>
 						))}
 					</CarouselContent>
-					<CarouselNext className="relative translate-[initial] top-[initial] right-[initial]" />
+					<CarouselNext className="relative translate-[initial] top-[initial] right-[initial] max-xl:hidden" />
 				</Carousel>
 			</DialogContent>
 		</Dialog>

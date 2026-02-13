@@ -28,8 +28,8 @@ const MainFeed = () => {
 	}, []);
 
 	return (
-		<div className="grid grid-cols-[repeat(2,var(--container-md))] gap-x-5 grid-rows-1 flex justify-center overflow-auto w-full h-full py-10">
-			<div className="flex flex-col w-md gap-y-5">
+		<div className="grid grid-cols-[repeat(2,var(--container-md))] gap-5 grid-rows-1 flex justify-center overflow-auto w-full h-full py-10 max-xl:grid-cols-1 max-xl:px-5 max-xl:grid-rows-[max-content_1fr] max-xl:py-14 max-xl:justify-items-center">
+			<div className="flex flex-col w-md gap-y-5 max-xl:row-2 max-w-full">
 				{addedPosts?.map(post => (
 					<Post key={post.id} {...post} />
 				))}

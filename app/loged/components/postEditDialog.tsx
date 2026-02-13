@@ -32,7 +32,7 @@ const PostEditDialog = (
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTitle>{postName} editing dialog</DialogTitle>
-			<DialogContent className="bg-transparent border-none p-0" aria-describedby={undefined}>
+			<DialogContent className="bg-transparent border-none p-0 max-h-9/10 overflow-auto" aria-describedby={undefined}>
 				<PostForm
 					editId={postId}
 					editTitle={postName}

@@ -100,7 +100,6 @@ const UserProfilePicture = (
 		reader.readAsDataURL(file);
 
 	}, [session, update]);
-	console.log(userProfilePic, isLoading)
 
 	return (
 		<label className={cn(

@@ -65,7 +65,7 @@ const ProfileHeader = () => {
 	}, [user]);
 
 	return (
-		<div className="flex flex-row items-center gap-x-3">
+		<div className="flex flex-row items-center gap-3 max-lg:flex-col max-lg:items-center">
 			<header className="flex flex-row gap-x-3 items-center">
 				<UserProfilePicture userProfilePic={session?.user.username !== username ? user?.profilePic?.blob : undefined} />
 				<div className="flex flex-col">
@@ -77,8 +77,9 @@ const ProfileHeader = () => {
 					)}
 				</div>
 			</header>
-			<Separator orientation="vertical" className="bg-white/30" />
-			<div className="flex flex-col gap-y-1">
+			<Separator orientation="vertical" className="bg-white/30 max-lg:hidden" decorative />
+			<Separator orientation="horizontal" className="bg-white/30 lg:hidden" decorative />
+			<div className="flex flex-col gap-y-1 max-lg:items-center">
 				<div className="flex flex-row gap-x-2">
 					<p>Followers: {followers}</p>
 					<p>Following: {following}</p>

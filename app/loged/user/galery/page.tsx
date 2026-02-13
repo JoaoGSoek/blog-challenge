@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DeleteAlert from '../../components/deleteAlert';
 import MediaGalery from '../../components/galeryDialog';
 
@@ -26,17 +27,23 @@ const GaleryColumns = ({ galery }: { galery: MediaType[] }) => {
 	const [mediaGalery, setMediaGalery] = useState(galery);
 	const [mediaColumns, setMediaColumns] = useState<MediaType[][]>([[], [], []]);
 
+	const isMobile = useIsMobile();
+
 	useEffect(() => {
 		let currentColumn = 0;
-		const columns: MediaType[][] = [[], [], []];
-		mediaGalery.forEach(media => {
-			columns[currentColumn].push(media);
-			currentColumn++;
-			if (currentColumn === columns.length) currentColumn = 0;
-		});
-		setMediaColumns(columns);
+		if (isMobile) {
+			setMediaColumns([[...mediaGalery]]);
+		} else {
+			const columns: MediaType[][] = [[], [], []];
+			mediaGalery.forEach(media => {
+				columns[currentColumn].push(media);
+				currentColumn++;
+				if (currentColumn === columns.length) currentColumn = 0;
+			});
+			setMediaColumns(columns);
+		}
 		setDeletingId(-1);
-	}, [mediaGalery]);
+	}, [mediaGalery, isMobile]);
 
 	const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 	const [isGaleryOpen, setIsGaleryOpen] = useState(false);
@@ -62,7 +69,8 @@ const GaleryColumns = ({ galery }: { galery: MediaType[] }) => {
 
 	return (
 		<div
-			className="grid grid-cols-3 px-12 gap-6 overflow-auto h-full"
+			className="grid px-12 gap-6 overflow-auto h-full"
+			style={{ gridTemplateColumns: `repeat(${mediaColumns.length}, minmax(0, 1fr))` }}
 		>
 			<MediaGalery
 				isOpen={isGaleryOpen}

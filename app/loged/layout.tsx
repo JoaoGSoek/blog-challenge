@@ -18,7 +18,7 @@ const FeedLayout = async (
 	return (
 		<SessionProvider>
 			<TooltipProvider>
-				<SidebarProvider className="overflow-hidden h-screen bg-white/20">
+				<SidebarProvider className="overflow-hidden w-screen h-screen bg-white/20">
 					<FeedSidebar />
 					<SidebarInset className="relative overflow-hidden">
 						<SidebarTrigger className="absolute top-4 left-4" />
