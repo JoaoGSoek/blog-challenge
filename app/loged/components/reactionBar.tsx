@@ -45,43 +45,63 @@ const ReactionBar = (
 		reactionBreakdown,
 		commentCount,
 		showComments,
+		size = 'default',
+		userReactions = [],
 		setShowComments,
-		size = 'default'
 	}: {
 		postId?: number,
 		commentId?: number,
 		reactionBreakdown: PostType['reactionBreakdown'],
 		commentCount?: number,
 		showComments: boolean,
+		size?: 'default' | 'small',
+		userReactions?: string[],
 		setShowComments: Dispatch<SetStateAction<boolean>>,
-		size?: 'default' | 'small'
 	}
 ) => {
 
+	const [internalReactionCount, setInternalReactionCount] = useState<PostType['reactionBreakdown']>(reactionBreakdown);
+	const [internalUserReactions, setInternalUserReactions] = useState<string[]>(userReactions);
+
 	// Post reaction handling and callback
-	const [userReactions, setUserReactions] = useState<string[]>([]);
 	const reactionHandler = useCallback((reactionType: string) => {
-		if (!userReactions.includes(reactionType))
-			fetch(`/api/${postId ? 'post' : 'comment'}/react`, {
-				method: "POST",
-				body: JSON.stringify({
-					postId,
-					commentId,
-					reactionType,
-				})
-			}).then(async (res) => {
-				const data = await res.text();
-				const { status, message } = JSON.parse(data);
-				if (status === 200) {
-					const newReactions = [...userReactions];
+
+		const method = (!internalUserReactions.includes(reactionType)) ? "POST" : "DELETE";
+		fetch(`/api/react`, {
+			method,
+			body: JSON.stringify({
+				postId,
+				commentId,
+				reactionType,
+			})
+		}).then(async (res) => {
+			const data = await res.text();
+			const { status, message } = JSON.parse(data);
+
+			if (status === 200) {
+
+				const newReactions = [...internalUserReactions];
+				const newBreakdown = { ...internalReactionCount };
+				const type = reactionType as keyof PostType['reactionBreakdown'];
+
+				if (method === "POST") {
 					newReactions.push(reactionType);
-					setUserReactions(newReactions);
-				} else toast.error(message);
-			});
-	}, [postId, userReactions, commentId]);
+					newBreakdown[type] = (newBreakdown[type] || 0) + 1;
+				} else {
+					const index = newReactions.indexOf(reactionType);
+					if (index > -1) newReactions.splice(index, 1);
+					newBreakdown[type] = Math.max(0, (newBreakdown[type] || 0) - 1);
+				}
+
+				setInternalReactionCount(newBreakdown);
+				setInternalUserReactions(newReactions);
+
+			} else toast.error(message);
+		});
+	}, [postId, commentId, internalUserReactions, internalReactionCount]);
 
 	return (
-		<div className="flex flex-row items-center justify-center gap-x-1 text-sm text-foreground/50">
+		<div className="flex flex-row flex-wrap items-center justify-center gap-x-1 text-sm text-foreground/50">
 			<ReactionButton
 				count={commentCount || 0}
 				Icon={MessageSquare}
@@ -89,42 +109,37 @@ const ReactionBar = (
 				onClick={() => setShowComments(b => !b)}
 				size={size}
 			/>
-			<Separator orientation="vertical" className="!h-5" />
 			<ReactionButton
-				count={(reactionBreakdown.LIKE || 0 + (userReactions.includes(ReactionType.LIKE) ? 1 : 0))}
-				variant={userReactions.includes(ReactionType.LIKE) ? 'outline' : 'ghost'}
+				count={internalReactionCount.LIKE || 0}
+				variant={internalUserReactions.includes(ReactionType.LIKE) ? 'outline' : 'ghost'}
 				onClick={() => reactionHandler(ReactionType.LIKE)}
 				size={size}
 				Icon={ThumbsUp}
 			/>
-			<Separator orientation="vertical" className="!h-5" />
 			<ReactionButton
-				count={reactionBreakdown.LOVE || 0 + (userReactions.includes(ReactionType.LOVE) ? 1 : 0)}
-				variant={userReactions.includes(ReactionType.LOVE) ? 'outline' : 'ghost'}
+				count={internalReactionCount.LOVE || 0}
+				variant={internalUserReactions.includes(ReactionType.LOVE) ? 'outline' : 'ghost'}
 				onClick={() => reactionHandler(ReactionType.LOVE)}
 				size={size}
 				Icon={Heart}
 			/>
-			<Separator orientation="vertical" className="!h-5" />
 			<ReactionButton
-				count={reactionBreakdown.HAHA || 0 + (userReactions.includes(ReactionType.HAHA) ? 1 : 0)}
-				variant={userReactions.includes(ReactionType.HAHA) ? 'outline' : 'ghost'}
+				count={internalReactionCount.HAHA || 0}
+				variant={internalUserReactions.includes(ReactionType.HAHA) ? 'outline' : 'ghost'}
 				onClick={() => reactionHandler(ReactionType.HAHA)}
 				size={size}
 				Icon={Laugh}
 			/>
-			<Separator orientation="vertical" className="!h-5" />
 			<ReactionButton
-				count={reactionBreakdown.SAD || 0 + (userReactions.includes(ReactionType.SAD) ? 1 : 0)}
-				variant={userReactions.includes(ReactionType.SAD) ? 'outline' : 'ghost'}
+				count={internalReactionCount.SAD || 0}
+				variant={internalUserReactions.includes(ReactionType.SAD) ? 'outline' : 'ghost'}
 				onClick={() => reactionHandler(ReactionType.SAD)}
 				size={size}
 				Icon={Frown}
 			/>
-			<Separator orientation="vertical" className="!h-5" />
 			<ReactionButton
-				count={reactionBreakdown.ANGRY || 0 + (userReactions.includes(ReactionType.ANGRY) ? 1 : 0)}
-				variant={userReactions.includes(ReactionType.ANGRY) ? 'outline' : 'ghost'}
+				count={internalReactionCount.ANGRY || 0}
+				variant={internalUserReactions.includes(ReactionType.ANGRY) ? 'outline' : 'ghost'}
 				onClick={() => reactionHandler(ReactionType.ANGRY)}
 				size={size}
 				Icon={Angry}

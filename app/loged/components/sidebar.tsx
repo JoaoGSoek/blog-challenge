@@ -1,11 +1,10 @@
 'use client'
 
-import { CircleUser, GalleryVertical, Images, LogOut, type LucideIcon, MessageSquare, Smile } from "lucide-react"
-import Image from "next/image"
+import { CircleUser, GalleryVertical, Images, LogOut, type LucideIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
-import { type MouseEventHandler, useEffect, useMemo, useState } from "react"
+import { type MouseEventHandler, useMemo, } from "react"
 import UndismissableFeedbackDialog from "@/components/composed/feedbackDialog"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import UserProfilePicture from "./profilePicture"
 
 const FeedSidebarButton = (
 	{
@@ -70,29 +70,15 @@ const FeedSidebar = (
 	{
 		variant = 'inset',
 		collapsible = 'icon',
-		profilePicture,
 	}: {
 		variant?: 'inset' | 'floating' | 'sidebar',
 		collapsible?: 'offcanvas' | 'none' | 'icon',
-		profilePicture?: string,
 	}
 ) => {
 
 	const session = useSession();
 	const username = useMemo(() => session.data?.user.username, [session]);
 	const email = useMemo(() => session.data?.user.email, [session]);
-	const profilePicId = useMemo(() => session.data?.user.profilePicId, [session]);
-	const [profilePic, setProfilePic] = useState();
-
-	useEffect(() => {
-		if (profilePicId)
-			fetch(`/api/media?id=${profilePicId}`, {
-				method: 'GET',
-			}).then(res => res.json()).then(res => {
-				console.log(res);
-				if (res.status === 200) setProfilePic(res.media.blob)
-			});
-	}, [profilePicId]);
 
 	return (
 		<Sidebar
@@ -104,8 +90,8 @@ const FeedSidebar = (
 				className="grid grid-cols-[max-content_1fr] items-center gap-x-2 group-data-[state=collapsed]:px-0 transition-all duration-200"
 			>
 
-				{(profilePic && username) ? (
-					<Image src={profilePic} alt={username} width={80} height={80} className="rounded-full" />
+				{username ? (
+					<UserProfilePicture />
 				) : (
 					<Skeleton className="w-20 rounded-full bg-white group-data-[state=collapsed]:w-(--sidebar-width-icon) aspect-square transition-all duration-200" />
 				)}
@@ -131,18 +117,6 @@ const FeedSidebar = (
 					Icon={Images}
 					title="Galery"
 					href={`/loged/user/galery?username=${username}`}
-				/>
-				<Separator />
-				<FeedSidebarButton
-					Icon={MessageSquare}
-					title="Comments"
-					href={`/loged/user/comments?username=${username}`}
-				/>
-				<Separator />
-				<FeedSidebarButton
-					Icon={Smile}
-					title="Reactions"
-					href={`/loged/user/reactions?username=${username}`}
 				/>
 			</SidebarContent>
 			<SidebarFooter>

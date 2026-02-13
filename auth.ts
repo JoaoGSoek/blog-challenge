@@ -74,11 +74,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 		signIn: "/",
 	},
 	callbacks: {
-		async jwt({ token, user }) {
+		async jwt({ token, user, trigger, session }) {
 			if (user) {
 				token.id = user.id;
 				token.username = (user as unknown as User).username;
 				token.profilePicId = (user as unknown as User).profilePicId;
+			}
+			if (trigger === "update" && session?.profilePicId !== undefined) {
+				token.profilePicId = session.profilePicId;
 			}
 			return token;
 		},

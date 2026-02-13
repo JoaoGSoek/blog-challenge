@@ -88,9 +88,9 @@ const Login = () => {
 							</div>
 						) : 'Login'}
 					</Button>
-					<Button variant="outline" className="w-full">
+					{/* <Button variant="outline" className="w-full">
 						Login with Google
-					</Button>
+					</Button> */}
 				</CardFooter>
 			</form>
 		</Card>

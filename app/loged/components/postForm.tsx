@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, X } from "lucide-react";
 import Image from "next/image";
-import { type ChangeEvent, useCallback } from "react";
+import { type ChangeEvent, useCallback, useMemo } from "react";
 import { type SubmitHandler, type UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { PostType } from "./post";
 
 const schema = z.object({
 	title: z.string().min(1).max(300),
@@ -23,12 +24,6 @@ const schema = z.object({
 		file: z.any(),
 	})).optional(),
 });
-
-const formDefaults = {
-	title: "",
-	content: "",
-	media: [],
-}
 
 const FileField = (
 	{
@@ -93,46 +88,99 @@ const FileField = (
 	)
 }
 
-const PostForm = () => {
-
-	const form = useForm<z.infer<typeof schema>>({
+const useAsyncForm = (defaultValues: z.infer<typeof schema>) => {
+	return useForm<z.infer<typeof schema>>({
 		resolver: zodResolver(schema),
-		defaultValues: formDefaults,
+		defaultValues,
 	});
+}
 
+const PostForm = (
+	{
+		editId,
+		editTitle,
+		editContent,
+		editMedia,
+		editCallback,
+		postCallback,
+	}: {
+		editId?: number,
+		editTitle?: string,
+		editContent?: string,
+		editMedia?: {
+			id: string,
+			preview: string,
+			file: string,
+		}[],
+		editCallback?: () => void
+		postCallback?: (addedPost: PostType) => void
+	}
+) => {
+
+	const formDefaults = useMemo(() => ({
+		title: editTitle || "",
+		content: editContent || "",
+		media: editMedia || [],
+	}), [editTitle, editContent, editMedia]);
+
+	const form = useAsyncForm(formDefaults);
 	const { isValid, isSubmitting } = form.formState;
 
 	const submitHandler: SubmitHandler<z.infer<typeof schema>> = useCallback(async (data) => {
-		let mediaBase64: string[] = [];
+		const mediaBase64: string[] = [];
 		if (data.media && data.media.length > 0) {
-			mediaBase64 = await Promise.all(data.media.map(m => new Promise<string>((resolve) => {
+			await Promise.all(data.media.map(m => new Promise<void>((resolve) => {
 				const reader = new FileReader();
-				reader.onloadend = () => resolve(reader.result as string);
-				reader.readAsDataURL(m.file);
+				reader.onloadend = () => {
+					mediaBase64.push(reader.result as string);
+					resolve();
+				};
+				if (typeof m.file === 'object') reader.readAsDataURL(m.file);
+				else resolve()
 			})));
 		}
 
+		const body: { title: string, content: string, media?: string[], id?: number, mediaIds?: number[] } = { ...data, media: mediaBase64 };
+		if (editId) {
+			body.id = editId;
+			if (data.media && editMedia) {
+				const mediaIds: number[] = [];
+				data.media.forEach(newMedia => {
+					const remainderMediaId = editMedia.find(oldMedia => oldMedia.id === newMedia.id)?.id;
+					if (remainderMediaId) mediaIds.push(parseInt(remainderMediaId, 10));
+				});
+				body.mediaIds = mediaIds;
+			}
+		}
+
 		fetch("/api/post", {
-			method: "POST",
-			body: JSON.stringify({ ...data, media: mediaBase64 }),
+			method: editId ? "PUT" : "POST",
+			body: JSON.stringify(body),
 		}).then(async (res) => {
 			const data = await res.text();
-			const { status, message } = JSON.parse(data);
+			const { status, message, data: post } = JSON.parse(data);
 			if (status === 200) {
 				toast.success(message);
-				form.reset(formDefaults);
+				if (!editId) {
+					form.reset(formDefaults);
+					if (postCallback) postCallback(post);
+				} else if (editCallback) editCallback();
 			} else {
 				toast.error(message);
 			}
 		});
-	}, [form]);
+	}, [form, formDefaults, editId, editMedia, editCallback, postCallback]);
 
 	return (
 		<form className="sticky top-0" onSubmit={form.handleSubmit(submitHandler)}>
 			<Card className="gap-y-3 py-5">
 				<CardHeader className="gap-y-1">
-					<CardTitle className="text-lg">Share something with the world</CardTitle>
-					<CardDescription>This is where you can create a post</CardDescription>
+					<CardTitle className="text-lg">
+						{editId ? `Editing ${editTitle}` : "Share something with the world"}
+					</CardTitle>
+					<CardDescription>
+						{editId ? "If you overshared, or undershared, now is the time to fix that" : "This is where you can create a post"}
+					</CardDescription>
 				</CardHeader>
 				<Separator className="!w-8/10 self-center" />
 				<CardContent className="flex flex-col gap-y-2">
@@ -168,7 +216,7 @@ const PostForm = () => {
 								disabled={!isValid || isSubmitting}
 							>
 								<Send />
-								Share
+								{editId ? 'Update' : 'Share'}
 							</Button>
 						</TooltipTrigger>
 						{!isValid && (

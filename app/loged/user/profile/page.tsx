@@ -2,7 +2,7 @@
 
 import { Meh } from 'lucide-react';
 import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,12 +41,9 @@ const renderPostColumns = (data: PostType[]) => {
 
 export default function Page() {
 
-	const { contentType } = useParams();
+	const params = useSearchParams();
 	const session = useSession();
-	console.log(session);
-
-	const searchParams = useSearchParams();
-	const username = useMemo(() => session.data?.user.username, [session]);
+	const username = useMemo(() => params.get('username') || session.data?.user.username, [params, session]);
 
 	const [data, setData] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ message: "Login succesfull!" });
 	} catch (e) {
-		console.log(e);
+		e;
 		return NextResponse.json({
 			status: 500,
 			message: e,

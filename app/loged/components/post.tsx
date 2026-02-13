@@ -1,19 +1,20 @@
-import { type LucideIcon, Pencil, Plus, Trash2 } from 'lucide-react'
+import type { ReactionType } from '@prisma/client'
+import { Plus, } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { type Dispatch, type MouseEventHandler, type SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Carousel, type CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
+import { cn, dateFormatter } from '@/lib/utils'
+import type { MediaType } from '../user/galery/page'
+import ActionButtons from './actionButtons'
 import CommentList from './commentList'
+import MediaGalery from './galeryDialog'
+import PostEditDialog from './postEditDialog'
+import { ProfilePicture } from './profilePicture'
 import ReactionBar from './reactionBar'
 
 export type PostType = {
@@ -25,14 +26,16 @@ export type PostType = {
 	user: {
 		id: number,
 		username: string,
-		email: string
-	},
-	postMedia: [{
-		media: {
+		email: string,
+		profilePic: {
 			blob: string,
 			id: number
 		}
-	}],
+	},
+	postMedia: {
+		id: number,
+		media: MediaType
+	}[],
 	_count: {
 		comments?: number
 	},
@@ -42,96 +45,8 @@ export type PostType = {
 		HAHA?: number
 		SAD?: number
 		ANGRY?: number
-	}
-}
-
-const MediaGalery = (
-	{
-		isOpen,
-		setIsOpen,
-		active,
-		setActive,
-		postTitle,
-		postMedia
-	}: {
-		isOpen: boolean,
-		setIsOpen: Dispatch<SetStateAction<boolean>>,
-		active: number,
-		setActive: Dispatch<SetStateAction<number>>,
-		postTitle: string,
-		postMedia: PostType['postMedia']
-	}
-) => {
-	const [api, setApi] = useState<CarouselApi>()
-
-	useEffect(() => {
-		if (!api) return;
-		api.scrollTo(active);
-	}, [active, api]);
-
-	useEffect(() => {
-		if (!api) return;
-		api.on("select", () => {
-			setActive(api.selectedScrollSnap())
-		})
-	}, [api, setActive])
-
-	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogContent className="aspect-square !w-[initial] !max-h-9/10 !max-w-9/10 overflow-hidden grid grid-rows-[max-content_1fr]">
-				<DialogHeader>
-					<DialogTitle>Galeria de {postTitle}</DialogTitle>
-				</DialogHeader>
-				<Carousel
-					setApi={setApi}
-					className="flex flex-row items-center w-full h-full overflow-hidden gap-2"
-				>
-					<CarouselPrevious className="relative translate-[initial] top-[initial] left-[initial]" />
-					<CarouselContent className="w-full h-full ml-0">
-						{isOpen && postMedia.map(({ media }) => (
-							<CarouselItem key={media.id} className="w-full h-full pl-0">
-								<Image
-									src={media.blob}
-									alt={`Image associated with ${postTitle}`}
-									width={800}
-									height={800}
-									className="w-full h-full object-contain"
-								/>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-					<CarouselNext className="relative translate-[initial] top-[initial] right-[initial]" />
-				</Carousel>
-			</DialogContent>
-		</Dialog>
-	)
-}
-
-const format = new Intl.DateTimeFormat('en-US', {
-	year: 'numeric',
-	month: 'short',
-	day: 'numeric',
-	hour: 'numeric',
-	minute: 'numeric',
-	hour12: true,
-});
-
-const PostActionButtons = (
-	{
-		variant,
-		Icon,
-		onClick
-	}: {
-		variant: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined,
-		Icon: LucideIcon,
-		onClick?: MouseEventHandler<HTMLButtonElement>
-	}
-) => {
-	return (
-		<Button onClick={onClick} variant={variant} className="size-8 !p-0 flex items-center justify-center">
-			<Icon className="size-4" />
-		</Button>
-	)
+	},
+	userReactions: ReactionType[]
 }
 
 const Post = (
@@ -144,7 +59,8 @@ const Post = (
 		user,
 		postMedia,
 		_count,
-		reactionBreakdown
+		reactionBreakdown,
+		userReactions
 	}: PostType
 ) => {
 
@@ -155,6 +71,9 @@ const Post = (
 		if (!postMedia) return [];
 		return postMedia.slice(0, 3);
 	}, [postMedia]);
+	const fixedPostMedia = useMemo(() => (
+		postMedia.map(({ media }) => media)
+	), [postMedia]);
 
 	const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 	const [isGaleryOpen, setIsGaleryOpen] = useState(false);
@@ -165,8 +84,11 @@ const Post = (
 	}, []);
 
 	// Post date sanitizing
-	const isEdit = useMemo(() => new Date(postTimestamp) > new Date(editTimestamp), [postTimestamp, editTimestamp]);
+	const isEdit = useMemo(() => new Date(postTimestamp) < new Date(editTimestamp), [postTimestamp, editTimestamp]);
 	const timestampDate = useMemo(() => isEdit ? new Date(postTimestamp) : new Date(editTimestamp), [postTimestamp, editTimestamp, isEdit]);
+
+	// Post comment loading handler
+	const [showComments, setShowComments] = useState(false);
 
 	// Post deletion handling and callback
 	const [isDeleted, setIsDeleted] = useState(false);
@@ -183,8 +105,8 @@ const Post = (
 		});
 	}, [id]);
 
-	// Post comment loading handler
-	const [showComments, setShowComments] = useState(false);
+	// Editing Handing
+	const [isEditing, setIsEditing] = useState(false);
 
 	// Real time DOM deletion
 	if (isDeleted) return;
@@ -197,8 +119,18 @@ const Post = (
 					setIsOpen={setIsGaleryOpen}
 					active={activeMediaIndex}
 					setActive={setActiveMediaIndex}
-					postTitle={title}
-					postMedia={postMedia}
+					title={title}
+					mediaGalery={fixedPostMedia}
+				/>
+			)}
+			{isEditing && (
+				<PostEditDialog
+					isOpen={isEditing}
+					setIsOpen={setIsEditing}
+					postId={id}
+					postName={title}
+					postContent={content}
+					postGalery={postMedia}
 				/>
 			)}
 			<Card className="gap-y-5 py-5" key={id}>
@@ -241,7 +173,10 @@ const Post = (
 				)}
 				<CardHeader className="grid-rows-1 gap-y-0">
 					<div className="grid grid-cols-[50px_1fr] items-center gap-x-3 row-1 col-1">
-						<Skeleton className="w-full aspect-square rounded-full bg-white" />
+						<ProfilePicture
+							profilePic={user.profilePic?.blob}
+							username={user.username}
+						/>
 						<div className="flex flex-col">
 							<h3 className="text-lg font-semibold">{title}</h3>
 							<h4 className="text-sm text-white/80">
@@ -252,30 +187,9 @@ const Post = (
 					</div>
 					{session?.data?.user.username === user.username && (
 						<CardAction className="flex flex-row items-center gap-x-2">
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<PostActionButtons
-										variant="destructive"
-										Icon={Trash2}
-									/>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-										<AlertDialogDescription>
-											This action cannot be undone. This will permanently delete your post.
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogFooter>
-										<AlertDialogCancel>Cancel</AlertDialogCancel>
-										<AlertDialogAction onClick={postDeleteHandler}>Continue</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialog>
-							<PostActionButtons
-								variant="outline"
-								Icon={Pencil}
-								onClick={() => { }}
+							<ActionButtons
+								deleteHandler={postDeleteHandler}
+								editHandler={() => setIsEditing(prev => !prev)}
 							/>
 						</CardAction>
 					)}
@@ -288,14 +202,14 @@ const Post = (
 						commentCount={_count?.comments}
 						showComments={showComments}
 						setShowComments={setShowComments}
+						userReactions={userReactions}
 					/>
 					<p className="text-sm text-wrap break-all">{content}</p>
 				</CardContent>
 				<CardFooter className="flex flex-col gap-y-2">
 					<div className="text-xs flex flex-row items-center justify-between gap-x-2 w-full">
-						<time dateTime={postTimestamp} className="text-white/60">
-							{format.format(timestampDate)}
-							{isEdit && " (edit)"}
+						<time dateTime={postTimestamp} className="text-white/60 italic">
+							{`${isEdit ? "Edited" : 'Posted'} at ${dateFormatter.format(timestampDate)}`}
 						</time>
 						<Button variant="link" className="self-end" onClick={() => setShowComments(b => !b)}>{showComments ? 'Hide' : 'See'} comments</Button>
 					</div>
