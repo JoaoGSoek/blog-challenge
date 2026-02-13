@@ -67,7 +67,7 @@ const ProfileHeader = () => {
 	return (
 		<div className="flex flex-row items-center gap-x-3">
 			<header className="flex flex-row gap-x-3 items-center">
-				<UserProfilePicture userProfilePic={user?.profilePic?.blob} />
+				<UserProfilePicture userProfilePic={session?.user.username !== username ? user?.profilePic?.blob : undefined} />
 				<div className="flex flex-col">
 					<h1 className="text-2xl font-semibold">@{username}</h1>
 					{!user?.email ? (

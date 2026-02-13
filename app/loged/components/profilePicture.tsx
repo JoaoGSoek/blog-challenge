@@ -11,10 +11,10 @@ import { cn } from '@/lib/utils';
 export const ProfilePicture = (
 	{
 		profilePic,
-		username
+		username,
 	}: {
 		profilePic?: string,
-		username?: string
+		username?: string,
 	}
 ) => {
 
@@ -31,9 +31,11 @@ export const ProfilePicture = (
 
 const UserProfilePicture = (
 	{
-		userProfilePic
+		userProfilePic,
+		className
 	}: {
-		userProfilePic?: string
+		userProfilePic?: string,
+		className?: string
 	}
 ) => {
 
@@ -56,6 +58,7 @@ const UserProfilePicture = (
 			fetch(`/api/media?id=${profilePicId}`, {
 				method: 'GET',
 			}).then(async res => {
+				setIsLoading(false);
 				const { data } = await res.json();
 				if (res.status === 200 && data.blob)
 					setProfilePic(data.blob)
@@ -101,7 +104,8 @@ const UserProfilePicture = (
 	return (
 		<label className={cn(
 			"grid size-20 rounded-full overflow-hidden p-0",
-			(!userProfilePic && !isLoading) && "cursor-pointer"
+			(!userProfilePic && !isLoading) && "cursor-pointer",
+			className
 		)}>
 			<input type="file" accept="image/*" onChange={handleProfilePicChange} disabled={(!userProfilePic && !isLoading)} hidden />
 			{isLoading ? (

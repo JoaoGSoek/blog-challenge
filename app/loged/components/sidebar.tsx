@@ -91,7 +91,7 @@ const FeedSidebar = (
 			>
 
 				{username ? (
-					<UserProfilePicture />
+					<UserProfilePicture className="group-data-[state=collapsed]:size-(--sidebar-width-icon)" />
 				) : (
 					<Skeleton className="w-20 rounded-full bg-white group-data-[state=collapsed]:w-(--sidebar-width-icon) aspect-square transition-all duration-200" />
 				)}
