@@ -3,7 +3,6 @@ import { Angry, Frown, Heart, Laugh, type LucideIcon, MessageSquare, ThumbsUp } 
 import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { PostType } from "./post";
 

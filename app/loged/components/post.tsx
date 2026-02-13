@@ -1,4 +1,3 @@
-import type { ReactionType } from '@prisma/client'
 import { Plus, } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,6 +15,8 @@ import MediaGalery from './galeryDialog'
 import PostEditDialog from './postEditDialog'
 import { ProfilePicture } from './profilePicture'
 import ReactionBar from './reactionBar'
+
+type ReactionType = "LIKE" | "LOVE" | "HAHA" | "SAD" | "ANGRY"
 
 export type PostType = {
 	id: number,
