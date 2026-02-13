@@ -124,21 +124,28 @@
     @apply bg-background text-foreground;
   }
 }
-
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+	width: 8px;
+	height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
-  border-radius: 8px;
+	background: var(--background);
+	border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--foreground) 70%, transparent);
-  border-radius: 8px;
-  border: 2px solid var(--background);
+	background: color-mix(in oklab, var(--foreground) 70%, transparent);
+	border-radius: 8px;
+	border: 2px solid var(--background);
+}
+
+@media(max-width: 768px){
+	::-webkit-scrollbar{
+		width: 0px;
+		height: 0px;
+		display: none;
+	}
 }
 
 @supports not selector(::-webkit-scrollbar) {
