@@ -1,9 +1,7 @@
-import * as React from "react"
-
-import TextareaAutosize from 'react-textarea-autosize'
+import TextareaAutosize, { type TextareaAutosizeProps } from 'react-textarea-autosize'
 import { cn } from "@/lib/utils"
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+function Textarea({ className, ...props }: TextareaAutosizeProps) {
 	return (
 		<TextareaAutosize
 			data-slot="textarea"
