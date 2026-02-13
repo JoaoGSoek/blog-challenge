@@ -1,10 +1,9 @@
-import { ReactionType } from "@prisma/client";
 import { Angry, Frown, Heart, Laugh, type LucideIcon, MessageSquare, ThumbsUp } from "lucide-react";
 import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { PostType } from "./post";
+import { type PostType, ReactionType } from "./post";
 
 const ReactionButton = (
 	{

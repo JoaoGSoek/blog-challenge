@@ -16,7 +16,13 @@ import PostEditDialog from './postEditDialog'
 import { ProfilePicture } from './profilePicture'
 import ReactionBar from './reactionBar'
 
-type ReactionType = "LIKE" | "LOVE" | "HAHA" | "SAD" | "ANGRY"
+export enum ReactionType {
+	LIKE = "LIKE",
+	LOVE = "LOVE",
+	HAHA = "HAHA",
+	SAD = "SAD",
+	ANGRY = "ANGRY",
+}
 
 export type PostType = {
 	id: number,
