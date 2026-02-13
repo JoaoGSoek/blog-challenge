@@ -100,6 +100,7 @@ const UserProfilePicture = (
 		reader.readAsDataURL(file);
 
 	}, [session, update]);
+	console.log(userProfilePic, isLoading)
 
 	return (
 		<label className={cn(
@@ -107,7 +108,7 @@ const UserProfilePicture = (
 			(!userProfilePic && !isLoading) && "cursor-pointer",
 			className
 		)}>
-			<input type="file" accept="image/*" onChange={handleProfilePicChange} disabled={(!userProfilePic && !isLoading)} hidden />
+			<input type="file" accept="image/*" onChange={handleProfilePicChange} disabled={(userProfilePic !== undefined || isLoading)} hidden />
 			{isLoading ? (
 				<Skeleton className="bg-white w-full h-full rounded-full" />
 			) : (
