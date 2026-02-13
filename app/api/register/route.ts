@@ -18,7 +18,8 @@ export async function POST(request: Request) {
 			status: 200,
 			message: "User created successfully",
 		});
-	} catch (_) {
+	} catch (e) {
+		console.error(e);
 		return NextResponse.json({
 			status: 500,
 			message: "Could not create user",
