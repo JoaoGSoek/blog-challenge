@@ -1,4 +1,5 @@
 'use client'
+import { Frown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
@@ -35,10 +36,15 @@ const MainFeed = () => {
 				{posts?.map(post => (
 					<Post key={post.id} {...post} />
 				))}
-				{isLoading && (
+				{isLoading ? (
 					<div className="flex flex-col items-center gap-y-1 pb-10">
 						<Spinner className="size-10" />
 						<p>Loading more posts</p>
+					</div>
+				) : (addedPosts?.length === 0 && posts?.length === 0) && (
+					<div className="flex flex-col items-center gap-y-1 pb-10">
+						<Frown className="size-10" />
+						<p>No posts to show</p>
 					</div>
 				)}
 				<Separator className="border-none bg-transparent !h-10" />

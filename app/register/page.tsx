@@ -103,9 +103,9 @@ const Register = () => {
 					<Button type="submit" className="w-full">
 						Register
 					</Button>
-					<Button type="button" variant="outline" className="w-full">
+					{/* <Button type="button" variant="outline" className="w-full">
 						Register with Google
-					</Button>
+					</Button> */}
 				</CardFooter>
 			</form>
 		</Card>
